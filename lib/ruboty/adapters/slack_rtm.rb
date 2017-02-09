@@ -25,10 +25,14 @@ module Ruboty
         if channel[0] == '#'
           channel = resolve_channel_id(channel[1..-1])
         end
+        Ruboty.logger.info(channel)
 
         return unless channel
 
+        Ruboty.logger.info('owaowari')
+
         if message[:attachments] && !message[:attachments].empty?
+          Ruboty.logger.info('kotti')
           client.chat_postMessage(
             channel: channel,
             text: message[:code] ?  "```\n#{message[:body]}\n```" : message[:body],
@@ -38,6 +42,7 @@ module Ruboty
             attachments: message[:attachments].to_json
           )
         else
+          Ruboty.logger.info('atti')
           realtime.send_message(
             type: 'message',
             channel: channel,
@@ -113,6 +118,8 @@ module Ruboty
 
       def on_message(data)
         user = user_info(data['user']) || {}
+        Ruboty.logger.info(user)
+        Ruboty.logger.info(data['channel'])
 
         channel = channel_info(data['channel'])
 
@@ -120,10 +127,12 @@ module Ruboty
           return
         end
 
+        Ruboty.logger.info("channel #{channel}")
         if channel
           return if channel['name'] == (ENV['SLACK_GENERAL_NAME'] || 'general') && ENV['SLACK_IGNORE_GENERAL'] == '1'
 
           channel_to = expose_channel_name? ? "##{channel['name']}" : channel['id']
+          Ruboty.logger.info(channel_to)
         else # direct message
           channel_to = data['channel']
         end
@@ -301,12 +310,14 @@ module Ruboty
       def channel_info(channel_id)
         @channel_info_caches[channel_id] ||= begin
           resp = case channel_id
-            when /^C/
+            when /^G/
+              Ruboty.logger.info(client.channels_info(channel: channel_id))
               client.channels_info(channel: channel_id)
             else
               {}
             end
 
+          Ruboty.logger.info(resp['channel'])
           resp['channel']
         end
       end

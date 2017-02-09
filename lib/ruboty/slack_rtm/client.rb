@@ -40,6 +40,8 @@ module Ruboty
           if message.equal?(CONNECTION_CLOSED)
             break
           end
+          Ruboty.logger.info(message)
+          Ruboty.logger.info(@client.send(message))
           @client.send(message)
         end
       end
@@ -47,6 +49,7 @@ module Ruboty
       private
 
       def create_client(url)
+        Ruboty.logger.info("url #{url}")
         WebSocket::Client::Simple.connect(url, verify_mode: OpenSSL::SSL::VERIFY_PEER).tap do |client|
           client.on(:error) do |err|
             Ruboty.logger.error("#{err.class}: #{err.message}\n#{err.backtrace.join("\n")}")
